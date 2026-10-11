@@ -12,10 +12,12 @@ jobs:
       - name: Компиляция RedFox Recovery в Docker-окружении
         run: |
           docker run --rm -v ${{ github.workspace }}:/root/device_tree ubuntu:20.04 bash -c "
-          apt-get update && apt-get install -y git curl python3 repo &&
+          apt-get update && apt-get install -y git curl python3 &&
           mkdir workspace && cd workspace &&
           git config --global user.name 'Developer' &&
           git config --global user.email 'dev@example.com' &&
+          curl -sL https://lineageos.org > /usr/bin/repo &&
+          chmod a+x /usr/bin/repo &&
           repo init --depth=1 -u https://github.com -b twrp-12.1 &&
           repo sync -c -j\$(nproc) --force-sync --no-clone-bundle --no-tags &&
           mkdir -p device/realme/RMX3624 &&
