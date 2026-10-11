@@ -1,0 +1,41 @@
+name: OrangeFox Recovery Builder
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-20.04
+    steps:
+    - name: Очистка диска и подготовка
+      run: |
+        sudo docker image prune -a -f
+        sudo apt-get update
+        sudo apt-get install -y bc bison build-essential ccache curl flex g++-multilib gcc-multilib git gnupg gperf image_utils lib32ncurses5-dev lib32readline-dev lib32z1-dev liblz4-tool libncurses5 libncurses5-dev libsdl1.2-dev libssl-dev libxml2 libxml2-utils lzop pngcrush rsync schedtool squashfs-tools xsltproc zip zlib1g-dev
+
+    - name: Скачивание вашего дерева
+      uses: actions/checkout@v3
+      with:
+        path: device/realme/RMX3624
+
+    - name: Синхронизация минимального манифеста
+      run: |
+        mkdir workspace && cd workspace
+        git config --global user.name "Pavel"
+        git config --global user.email "pavel@example.com"
+        repo init --depth=1 -u https://github.com -b twrp-12.1
+        repo sync -c -j$(nproc) --force-sync --no-clone-bundle --no-tags
+
+    - name: Компиляция RedFox Recovery
+      run: |
+        cd workspace
+        mv ../device device/
+        . build/envsetup.sh
+        lunch twrp_RMX3624-eng || lunch omni_RMX3624-eng
+        make clean
+        mka recoveryimage -j$(nproc)
+
+    - name: Загрузка готового рекавери
+      uses: actions/upload-artifact@v3
+      with:
+        name: RedFox-Recovery-RealmeC33
+        path: workspace/out/target/product/RMX3624/recovery.img
