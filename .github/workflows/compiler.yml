@@ -9,16 +9,15 @@ jobs:
       - name: Скачивание вашего дерева
         uses: actions/checkout@v4
 
-      - name: Установка утилиты Google Repo
-        uses: palaimolas/setup-repo@v1
-
       - name: Компиляция RedFox Recovery в Docker-окружении
         run: |
-          docker run --rm -v ${{ github.workspace }}:/root/device_tree -v /usr/bin/repo:/usr/bin/repo ubuntu:20.04 bash -c "
-          apt-get update && apt-get install -y git curl python3 &&
+          docker run --rm -v ${{ github.workspace }}:/root/device_tree ubuntu:22.04 bash -c "
+          apt-get update && apt-get install -y git wget python3 python3-pip &&
           mkdir workspace && cd workspace &&
           git config --global user.name 'Developer' &&
           git config --global user.email 'dev@example.com' &&
+          wget -qO /usr/bin/repo https://googleapis.com &&
+          chmod a+x /usr/bin/repo &&
           repo init --depth=1 -u https://github.com -b twrp-12.1 &&
           repo sync -c -j\$(nproc) --force-sync --no-clone-bundle --no-tags &&
           mkdir -p device/realme/RMX3624 &&
