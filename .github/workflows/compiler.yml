@@ -1,4 +1,5 @@
-name: OrangeFox Recovery Builder
+name: OrangeFox Recovery Builder Realme RMX3624 
+
 on:
   workflow_dispatch:
 
