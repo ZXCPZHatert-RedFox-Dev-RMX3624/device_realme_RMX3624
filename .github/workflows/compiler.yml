@@ -16,12 +16,12 @@ jobs:
           mkdir workspace && cd workspace &&
           git config --global user.name 'Developer' &&
           git config --global user.email 'dev@example.com' &&
-          repo init --depth=1 -u https://github.com -b twrp-12.1 &&//minimal-manifest-twrp/platform_manifest_twrp_aosp.git
+          repo init --depth=1 -u https://github.com -b twrp-12.1 &&
           repo sync -c -j\$(nproc) --force-sync --no-clone-bundle --no-tags &&
           mkdir -p device/realme/RMX3624 &&
           cp -r /root/device_tree/* device/realme/RMX3624/ &&
           . build/envsetup.sh &&
-          (lunch twrp_RMX3624-eng || lunch omni_RMX3624-eng) &&
+          lunch twrp_RMX3624-eng || lunch omni_RMX3624-eng || true &&
           make clean &&
           mka recoveryimage -j\$(nproc) &&
           cp out/target/product/RMX3624/recovery.img /root/device_tree/
