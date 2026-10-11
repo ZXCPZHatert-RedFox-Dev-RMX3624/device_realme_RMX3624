@@ -12,42 +12,33 @@ jobs:
 
       - name: Setup Build Environment and Build
         run: |
-          # 1. Очистка места на сервере GitHub
           sudo rm -rf /usr/share/dotnet /etc/mysql /etc/php
           sudo apt-get clean
-          
-          # 2. Установка необходимых пакетов для сборки
           sudo apt-get update
           sudo apt-get install -y g++-multilib lib32ncurses5-dev lib32readline-dev lib32z1-dev liblz4-tool libncurses5-dev libsdl1.2-dev libssl-dev libxml2 libxml2-utils lzop pngcrush rsync schedtool squashfs-tools xsltproc zip zlib1g-dev git python3 ccache curl
-          
-          # 3. Установка утилиты repo
           mkdir -p ~/bin
           curl https://googleapis.com > ~/bin/repo
           chmod a+x ~/bin/repo
           sudo ln -sf ~/bin/repo /usr/bin/repo
 
-          # 4. Создание папки под исходники и их скачивание
           mkdir -p workspace
           cd workspace
           git config --global user.name "Developer"
           git config --global user.email "dev@example.com"
-          
-          # Инициализируем манифест (ветка fox_12.1 для Android 12)
+
           repo init -u https://gitlab.com -b fox_12.1 --depth=1
           repo sync -c -j$(nproc) --force-sync --no-clone-bundle --no-tags
 
-          # 5. Копируем файлы вашего Device Tree в нужную директорию сборщика
           mkdir -p device/realme/RMX3624
           cp -r ${{ github.workspace }}/* device/realme/RMX3624/
 
-          # 6. Запуск процесса компиляции рекавери
           . build/envsetup.sh
           lunch twrp_RMX3624-eng || lunch twrp_RMX3624-userdebug
           make clean
           mka recoveryimage -j$(nproc)
 
       - name: Upload Recovery Artifacts
-        uses: actions/artifacts@v4
+        uses: actions/upload-artifact@v4
         with:
           name: OrangeFox-RMX3624
           path: |
