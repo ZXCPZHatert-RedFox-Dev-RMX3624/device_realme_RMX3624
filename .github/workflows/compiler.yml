@@ -5,32 +5,51 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     steps:
       - name: Checkout tree
         uses: actions/checkout@v4
 
-      - name: Build Recovery inside Docker
+      - name: Setup Build Environment and Build
         run: |
-          docker run --rm -v ${{ github.workspace }}:/root/project ubuntu:22.04 bash -c "apt-get update && apt-get install -y bc bison build-essential ccache curl flex g++-multilib gcc-multilib git gnupg gperf lib32readline-dev lib32z1-dev libelf-dev liblz4-tool libncurses5-dev libsdl1.2-dev libssl-dev libxml2 libxml2-utils lzop pngcrush rsync schedtool squashfs-tools xsltproc zip zlib1g-dev python3 python3-pip repo && mkdir workspace && cd workspace && git config --global user.name 'Developer' && git config --global user.email 'dev@example.com' && repo init --depth=1 -u https://github.com -b twrp-12.1 && repo sync -c -j\$(nproc) --force-sync --no-clone-bundle --no-tags && mkdir -p device/realme/RMX3624 && cp -r /root/project/* device/realme/RMX3624/ && . build/envsetup.sh && lunch twrp_RMX3624-eng && make clean && mka recoveryimage -j\$(nproc) && mkdir workspace && cd workspace && git config --global user.name 'Developer' && git config --global user.email 'dev@example.com' && repo init --depth=1 -u https://github.com -b twrp-12.1 && repo sync -c -j\$(nproc) --force-sync --no-clone-bundle --no-tags && mkdir -p device/realme/RMX3624 && cp -r /root/project/* device/realme/RMX3624/ && . build/envsetup.sh && lunch twrp_RMX3624-eng && make clean && mka recoveryimage -j\$(nproc) && cp out/target/product/RMX3624/recovery.img /root/project/"
+          # 1. Очистка места на сервере GitHub
+          sudo rm -rf /usr/share/dotnet /etc/mysql /etc/php
+          sudo apt-get clean
+          
+          # 2. Установка необходимых пакетов для сборки
+          sudo apt-get update
+          sudo apt-get install -y g++-multilib lib32ncurses5-dev lib32readline-dev lib32z1-dev liblz4-tool libncurses5-dev libsdl1.2-dev libssl-dev libxml2 libxml2-utils lzop pngcrush rsync schedtool squashfs-tools xsltproc zip zlib1g-dev git python3 ccache curl
+          
+          # 3. Установка утилиты repo
+          mkdir -p ~/bin
+          curl https://googleapis.com > ~/bin/repo
+          chmod a+x ~/bin/repo
+          sudo ln -sf ~/bin/repo /usr/bin/repo
 
-      - name: Upload Recovery Image 
-          mkdir workspace && cd workspace &&
-          git config --global user.name 'Developer' &&
-          git config --global user.email 'dev@example.com' &&
-          repo init --depth=1 -u https://github.com -b fox_12.1 &&
-          repo sync -c -j\$(nproc) --force-sync --no-clone-bundle --no-tags &&
-          mkdir -p device/realme/RMX3624 &&
-          cp -r /root/project/* device/realme/RMX3624/ &&
-          . build/envsetup.sh &&
-          lunch twrp_RMX3624-eng &&
-          make clean &&
-          mka recoveryimage -j\$(nproc) &&
-          cp out/target/product/RMX3624/recovery.img /root/project/
-          "
+          # 4. Создание папки под исходники и их скачивание
+          mkdir -p workspace
+          cd workspace
+          git config --global user.name "Developer"
+          git config --global user.email "dev@example.com"
+          
+          # Инициализируем манифест (ветка fox_12.1 для Android 12)
+          repo init -u https://gitlab.com -b fox_12.1 --depth=1
+          repo sync -c -j$(nproc) --force-sync --no-clone-bundle --no-tags
 
-      - name: Upload Recovery Image
-        uses: actions/upload-artifact@v4
+          # 5. Копируем файлы вашего Device Tree в нужную директорию сборщика
+          mkdir -p device/realme/RMX3624
+          cp -r ${{ github.workspace }}/* device/realme/RMX3624/
+
+          # 6. Запуск процесса компиляции рекавери
+          . build/envsetup.sh
+          lunch twrp_RMX3624-eng || lunch twrp_RMX3624-userdebug
+          make clean
+          mka recoveryimage -j$(nproc)
+
+      - name: Upload Recovery Artifacts
+        uses: actions/artifacts@v4
         with:
-          name: RedFox-Recovery-RealmeC33
-          path: recovery.img
+          name: OrangeFox-RMX3624
+          path: |
+            workspace/out/target/product/RMX3624/*.img
+            workspace/out/target/product/RMX3624/*.zip
