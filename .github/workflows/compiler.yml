@@ -16,7 +16,7 @@ jobs:
           mkdir workspace && cd workspace &&
           git config --global user.name 'Developer' &&
           git config --global user.email 'dev@example.com' &&
-          repo init --depth=1 -u https://github.com -b twrp-12.1 &&
+          repo init --depth=1 -u https://github.com -b twrp-12.1 &&//minimal-manifest-twrp/platform_manifest_twrp_aosp.git
           repo sync -c -j\$(nproc) --force-sync --no-clone-bundle --no-tags &&
           mkdir -p device/realme/RMX3624 &&
           cp -r /root/device_tree/* device/realme/RMX3624/ &&
