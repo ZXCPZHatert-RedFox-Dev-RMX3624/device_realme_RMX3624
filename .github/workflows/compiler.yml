@@ -16,7 +16,7 @@ jobs:
           mkdir workspace && cd workspace &&
           git config --global user.name 'Developer' &&
           git config --global user.email 'dev@example.com' &&
-          curl -sL https://googleapis.com > /usr/bin/repo &&
+          curl -sL https://githubusercontent.com > /usr/bin/repo &&
           chmod a+x /usr/bin/repo &&
           repo init --depth=1 -u https://github.com -b twrp-12.1 &&
           repo sync -c -j\$(nproc) --force-sync --no-clone-bundle --no-tags &&
