@@ -21,20 +21,20 @@ jobs:
           chmod a+x ~/bin/repo
           echo "PATH=$HOME/bin:$PATH" >> $GITHUB_ENV
 
-      - name: Init RedFox manifest
+      - name: Init TWRP manifest
         run: |
-          mkdir -p ~/work/RedFox
-          cd ~/work/RedFox
+          mkdir -p ~/work/TWRP
+          cd ~/work/TWRP
           repo init -u https://github.com/minimal-manifest-twrp/platform_manifest_twrp_aosp.git -b twrp-12.1 --depth=1
           repo sync -j8 --force-sync --no-clone-bundle --no-tags
 
       - name: Copy device tree
         run: |
-          cp -r device/realme/RMX3624 ~/work/RedFox/device/realme/RMX3624
+          cp -r device/realme/RMX3624 ~/work/TWRP/device/realme/RMX3624
 
       - name: Build recovery
         run: |
-          cd ~/work/RedFox
+          cd ~/work/TWRP
           export ALLOW_MISSING_DEPENDENCIES=true
           source build/envsetup.sh
           lunch twrp_RMX3624-eng
@@ -44,4 +44,4 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: recovery.img
-          path: ~/work/RedFox/out/target/product/RMX3624/recovery.img
+          path: ~/work/TWRP/out/target/product/RMX3624/recovery.img
