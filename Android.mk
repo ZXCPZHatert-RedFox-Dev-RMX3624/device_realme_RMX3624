@@ -1,4 +1,4 @@
-ifneq ($(filter RMX3261,$(TARGET_DEVICE)),)
+ifneq ($(filter RMX3624,$(TARGET_DEVICE)),)
 
 LOCAL_PATH := device/realme/RMX3624
 
