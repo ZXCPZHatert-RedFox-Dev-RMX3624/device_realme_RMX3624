@@ -1,0 +1,7 @@
+# Android fstab file.
+#<src>                                                  <mnt_point>         <type>    <mnt_flags and options>                               <fs_mgr_flags>
+system                                                  /system             erofs     ro,barrier=1                                          wait,slotselect,avb=vbmeta_system,logical,first_stage_mount
+vendor                                                  /vendor             erofs     ro,barrier=1                                          wait,slotselect,avb=vbmeta_vendor,logical,first_stage_mount
+product                                                 /product            erofs     ro,barrier=1                                          wait,slotselect,logical,first_stage_mount
+/dev/block/bootdevice/by-name/userdata                  /data               f2fs      noatime,nosuid,nodev,no_barrier=1,inline_xattr,inline_data wait,check,fileencryption=aes-256-xts:aes-256-cts
+/dev/block/bootdevice/by-name/misc                      /misc               emmc      defaults                                              defaults
