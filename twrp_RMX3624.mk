@@ -11,4 +11,4 @@ PRODUCT_MODEL := RMX3624
 PRODUCT_MANUFACTURER := realme
 
 # Настройки RedFox интерфейса
-TW_THEME := portrait_hdpi_red
+TW_THEME := portrait_hdpi
