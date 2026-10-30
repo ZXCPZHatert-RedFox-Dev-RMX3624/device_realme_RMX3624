@@ -1,47 +1,47 @@
-name: RedFox Recovery Builder Realme RMX3624
+name: Build RedFox Recovery
 
 on:
   workflow_dispatch:
 
 jobs:
   build:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     steps:
-      - name: Checkout tree
+      - name: Checkout device tree
         uses: actions/checkout@v4
+        with:
+          path: device/realme/RMX3624
 
-      - name: Setup Build Environment and Build
+      - name: Set up build environment
         run: |
-          sudo rm -rf /usr/share/dotnet /etc/mysql /etc/php
-          sudo apt-get clean
           sudo apt-get update
-          sudo apt-get install -y g++-multilib lib32readline-dev lib32z1-dev liblz4-tool libncurses-dev libsdl1.2-dev libssl-dev libxml2 libxml2-utils lzop pngcrush rsync schedtool squashfs-tools xsltproc zip zlib1g-dev git python3 ccache curl
-          
+          sudo apt-get install -y git-core gnupg flex bison build-essential zip curl zlib1g-dev gcc-multilib g++-multilib libc6-dev-i386 libncurses5 lib32ncurses5-dev x11proto-core-dev libx11-dev lib32z1-dev libgl1-mesa-dev libxml2-utils xsltproc unzip fontconfig python3
           mkdir -p ~/bin
-          curl https://googleapis.com > ~/bin/repo
+          curl https://storage.googleapis.com/git-repo-downloads/repo > ~/bin/repo
           chmod a+x ~/bin/repo
-          sudo ln -sf ~/bin/repo /usr/bin/repo
+          echo "PATH=$HOME/bin:$PATH" >> $GITHUB_ENV
 
-          mkdir -p workspace
-          cd workspace
-          git config --global user.name "Developer"
-          git config --global user.email "dev@example.com"
-          
-          repo init -u https://gitlab.com -b fox_12.1 --depth=1
-          repo sync -c -j$(nproc) --force-sync --no-clone-bundle --no-tags
+      - name: Init RedFox manifest
+        run: |
+          mkdir -p ~/work/RedFox
+          cd ~/work/RedFox
+          repo init -u https://github.com/RedFox-Dev/RedFox_Manifest.git -b redfox-12.1 --depth=1
+          repo sync -j8 --force-sync --no-clone-bundle --no-tags
 
-          mkdir -p device/realme/RMX3624
-          cp -r ${{ github.workspace }}/* device/realme/RMX3624/
+      - name: Copy device tree
+        run: |
+          cp -r device/realme/RMX3624 ~/work/RedFox/device/realme/RMX3624
 
-          . build/envsetup.sh
-          lunch twrp_RMX3624-eng || lunch twrp_RMX3624-userdebug
-          make clean
-          mka recoveryimage -j$(nproc)
+      - name: Build recovery
+        run: |
+          cd ~/work/RedFox
+          export ALLOW_MISSING_DEPENDENCIES=true
+          source build/envsetup.sh
+          lunch twrp_RMX3624-eng
+          make recoveryimage -j8
 
-      - name: Upload Recovery Artifacts
+      - name: Upload recovery
         uses: actions/upload-artifact@v4
         with:
-          name: OrangeFox-RMX3624
-          path: |
-            workspace/out/target/product/RMX3624/*.img
-            workspace/out/target/product/RMX3624/*.zip
+          name: recovery.img
+          path: ~/work/RedFox/out/target/product/RMX3624/recovery.img
