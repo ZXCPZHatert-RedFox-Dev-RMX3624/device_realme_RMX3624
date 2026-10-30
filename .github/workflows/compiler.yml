@@ -29,7 +29,7 @@ jobs:
       - name: Build
         run: |
           cd ~/work/TWRP
-          cp -r $GITHUB_WORKSPACE/device/realme/RMX3624 ~/work/TWRP/device/realme/RMX3624
+          cp -r $GITHUB_WORKSPACE/* ~/work/TWRP/device/realme/RMX3624/
           export ALLOW_MISSING_DEPENDENCIES=true
           source build/envsetup.sh
           lunch twrp_RMX3624-eng
